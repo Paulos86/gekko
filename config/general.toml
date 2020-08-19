@@ -4,7 +4,6 @@ debug = true
 adapter = 'sqlite'
 
 [watch]
-exchange = 'Poloniex'
-currency = 'USDT'
-asset = 'BTC'
-
+exchange = 'Binance'
+currency = 'BTC'
+asset = 'BNB'
