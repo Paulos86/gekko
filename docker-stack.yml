@@ -1,0 +1,48 @@
+version: '3'
+services:
+  gekko:
+    image: registry.gitlab.com/paulos86/gekko
+    volumes:
+      - history:/usr/src/app/history
+      - config:/usr/src/app/config.js
+    networks:
+      - default
+      - traefik_public
+    links:
+      - redis
+    environment:
+     - HOST
+     - PORT
+     - USE_SSL
+    ports:
+      - "3000:3000"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik_public"
+        - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.http-gekko.entrypoints=http"
+        - "traefik.http.routers.http-gekko.rule=Host(`gekko.wurm.co.za`)"
+        - "traefik.http.routers.http-gekko.middlewares=https-redirect"
+        - "traefik.http.routers.https-gekko.rule=Host(`gekko.wurm.co.za`)"
+        - "traefik.http.routers.https-gekko.entrypoints=https"
+        - "traefik.http.routers.https-gekko.tls.certresolver=wurmcoza"
+        - "traefik.http.middlewares.admin-auth.basicauth.users=admin:$$apr1$$j8ZXQLoM$$3r1HLm0nY/AVYKE4Y1.HM/"
+        - "traefik.http.routers.https-gekko-admin.middlewares=admin-auth"
+        - "traefik.http.services.gekko.loadbalancer.server.port=3000"
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis:/data
+    networks:
+      - default
+
+volumes:
+  history:
+  config:
+  redis:
+
+networks:
+  traefik_public:
+    external: true
